@@ -1,6 +1,8 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Base.Theme.TrackNote" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.TrackNote"
+        parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowAnimationStyle">@null</item>
         <!-- Core Colors -->
         <item name="colorPrimary">#FFD700</item>           <!-- button -->
         <item name="colorOnPrimary">#2A2A2A</item>         <!-- primary text on button -->

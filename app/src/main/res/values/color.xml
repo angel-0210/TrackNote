@@ -12,5 +12,5 @@
     <color name="accent2">#8037E4</color>       <!-- Strong accent -->
     <color name="card2">#E6DAF8</color>           <!-- Surface tint -->
     <color name="background2">#6A1B9A</color>           <!-- Text accent -->
-
+    <color name="ic_launcher_background">#F0D785</color>
 </resources>

@@ -1,6 +1,5 @@
 package com.example.tracknote;
 
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,7 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class Account extends AppCompatActivity {
+public class Account extends BaseActivity {
 
     private ImageButton backButton;
     private ImageView profileImg;
@@ -58,14 +57,15 @@ public class Account extends AppCompatActivity {
         String relativeTime = getTimeSinceJoined(joinedDate);
         activeSinceText.setText("Active Since : " + relativeTime);
 
-       prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         // ActivityResultLauncher for image picking
         ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         Uri imageUri = result.getData().getData();
-                        saveImageUri(imageUri.toString());
+                        // 3. Update: Passed Uri object to the corrected save method
+                        saveImageUri(imageUri);
                         loadImage(); // Refresh with new image
                     }
                 }
@@ -79,10 +79,15 @@ public class Account extends AppCompatActivity {
             startActivity(new Intent(Account.this, Home.class));
             finish();
         });
+
+        // **<<--- CRITICAL FIX 1: Add read permission flag --->>**
         profileImg.setOnClickListener(v->{
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            // CRITICAL LINE: Grants temporary read permission to the URI.
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             imagePickerLauncher.launch(intent);
         });
+        // **<<--- END CRITICAL FIX 1 --->>**
 
         logoutButton.setOnClickListener(v -> {
             sessionManager.logout();
@@ -93,10 +98,20 @@ public class Account extends AppCompatActivity {
         });
     }
 
-    private void saveImageUri(String uri) {
-        prefs.edit().putString(KEY_USER_ICON, uri).apply();
+    // **<<--- CRITICAL FIX 2: Implement persistent URI access --->>**
+    private void saveImageUri(Uri uri) {
+        // Updated method signature from String to Uri
+        int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+        try {
+            // This grants persistent read access, allowing Glide to load the image later.
+            getContentResolver().takePersistableUriPermission(uri, takeFlags);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+        // Save the URI as a string
+        prefs.edit().putString(KEY_USER_ICON, uri.toString()).apply();
     }
-
+    // **<<--- END CRITICAL FIX 2 --->>**
 
 
     private void loadImage() {

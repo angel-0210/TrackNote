@@ -43,16 +43,7 @@
             android:layout_weight="1"
             android:padding="8dp"
              />
-    <Switch
-        android:id="@+id/toggleDark"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minWidth="50dp"
-        android:minHeight="48dp"
-        android:thumbTint="@color/accent"
-        android:trackTint="@color/background2"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-</LinearLayout>
+        </LinearLayout>
     <!-- Search Bar -->
         <androidx.appcompat.widget.SearchView
             android:id="@+id/searchBar"

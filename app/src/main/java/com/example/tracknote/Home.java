@@ -29,7 +29,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Home extends AppCompatActivity implements NotesAdapter.OnNoteClickListener {
+public class Home extends BaseActivity implements NotesAdapter.OnNoteClickListener {
     private TextView name;
     private SearchView search;
     private ImageButton account;
@@ -41,43 +41,31 @@ public class Home extends AppCompatActivity implements NotesAdapter.OnNoteClickL
     private SharedPreferences prefs;
     private static final String PREF_NAME = "user_prefs";
     private static final String KEY_USER_ICON = "user_icon_uri";
-    private Switch dark;
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        if (ThemeHelper.isDarkMode(this)) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home);
         account = findViewById(R.id.imgAcc);
         name = findViewById(R.id.greet);
-        dark=findViewById(R.id.toggleDark);
+
         search = findViewById(R.id.searchBar);
-        // Disable auto focus at startup
+
+        // **<<--- SearchView Cleanup (Best Practice) --->>**
         search.setIconifiedByDefault(true);
-        search.clearFocus();
         search.setFocusable(false);
-        search.setFocusableInTouchMode(false);
-
-
-        search.setIconifiedByDefault(false);  // Show full SearchView
-        search.setIconified(true);            // Temporarily iconify
         search.clearFocus();
-        search.setFocusable(false);
-        search.setFocusableInTouchMode(false);
-        search.setQuery("", false);
-
 
         search.setOnClickListener(v -> {
-            search.setIconified(false);       // Expand the search
+            search.setIconified(false);
             search.setFocusable(true);
             search.setFocusableInTouchMode(true);
             search.requestFocus();
         });
+        // **<<--- END SearchView Cleanup --->>**
+
 
         notesView = findViewById(R.id.rView);
         notesView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
@@ -114,14 +102,6 @@ public class Home extends AppCompatActivity implements NotesAdapter.OnNoteClickL
         userId = session.getUserId();
 
 
-        dark.setChecked(ThemeHelper.isDarkMode(Home.this));
-        dark.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            ThemeHelper.setDarkMode(this, isChecked);
-            AppCompatDelegate.setDefaultNightMode(
-                    isChecked ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
-            );
-            Home.this.recreate(); // recreate activity to apply theme
-        });
 
         add.setOnClickListener(v -> {
             AddNote bottomSheet = new AddNote();
@@ -187,6 +167,19 @@ public class Home extends AppCompatActivity implements NotesAdapter.OnNoteClickL
     protected void onResume() {
         super.onResume();
         loadNotes(userId);
+
+        // 3. ADDED: Reload the image when returning to Home, in case it was updated in Account
+        String uri = prefs.getString(KEY_USER_ICON, null);
+        if (uri != null) {
+            Glide.with(this)
+                    .load(Uri.parse(uri))
+                    .placeholder(R.drawable.profile1)
+                    .error(R.drawable.profile1)
+                    .circleCrop()
+                    .into(account);
+        } else {
+            account.setImageResource(R.drawable.profile1);
+        }
     }
     public void reloadNotes() {
         SessionManager session = new SessionManager(this);
