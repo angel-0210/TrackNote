@@ -2,7 +2,6 @@ package com.example.tracknote;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -20,7 +19,7 @@ public class Login extends AppCompatActivity {
     EditText mail,pass;
     Button log;
     TextView signUp;
-    private  SessionManager session;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,14 +28,12 @@ public class Login extends AppCompatActivity {
         pass=findViewById(R.id.password);
         log=findViewById(R.id.login_button);
         signUp=findViewById(R.id.sign_up_link);
-        session=new SessionManager(Login.this);
+        SessionManager session = new SessionManager(Login.this);
         if (session.isLoggedIn()) {
             startActivity(new Intent(Login.this, Home.class));
             finish();
         }
-        log.setOnClickListener(v -> {
-          login();
-        });
+        log.setOnClickListener(v -> login());
         signUp.setOnClickListener(v -> {
             Intent intent = new Intent(Login.this, Register.class);
             startActivity(intent);
@@ -60,14 +57,10 @@ public class Login extends AppCompatActivity {
             // Get user by email only
             User loggedUser = userDao.findByEmail(email);
 
-            boolean isValid = false;
-            if (loggedUser != null && BCrypt.checkpw(Pass, loggedUser.password)) {
-                isValid = true;
-            }
+            boolean isValid = loggedUser != null && BCrypt.checkpw(Pass, loggedUser.password);
 
-            boolean finalIsValid = isValid;
             runOnUiThread(() -> {
-                if (finalIsValid) {
+                if (isValid) {
                     // Save session info
                     SessionManager session = new SessionManager(Login.this);
                     session.createSession(loggedUser.local_User_id, loggedUser.name, loggedUser.email);
