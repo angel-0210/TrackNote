@@ -1,0 +1,98 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+
+    android:background="@color/accent2">
+
+    <!-- App name header -->
+    <TextView
+        android:layout_marginTop="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TrackNote"
+        android:textSize="40sp"
+        android:textColor="@color/primary"
+        android:layout_gravity="center"
+
+        android:textStyle="bold"/>
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:layout_width="200dp"
+        android:layout_height="254dp"
+        android:layout_gravity="center"
+        android:scaleType="fitXY"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/notebook" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/card_bg"
+        android:padding="15dp"
+        >
+        <TextView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome back !!"
+            android:textSize="35sp"
+            android:textColor="@color/background2"
+            android:fontFamily="sans-serif-medium"
+            android:layout_gravity="center"
+            android:paddingBottom="16dp" />
+    <!-- Email input -->
+    <EditText
+        android:id="@+id/email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:background="@drawable/field_bg"
+        android:padding="12dp"
+        android:textColor="@color/primary"
+        android:textColorHint="@color/secondary"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Password input -->
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+
+        android:background="@drawable/field_bg"
+        android:padding="12dp"
+        android:textColor="@color/primary"
+        android:textColorHint="@color/secondary"
+        android:inputType="textPassword"
+        android:layout_marginBottom="16dp"/>
+
+
+
+    <!-- Login button -->
+    <Button
+        android:id="@+id/login_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Log In"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:textColor="@color/primary"
+        android:background="@drawable/btn_bg"
+        app:backgroundTint="@color/button"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Sign up link -->
+    <TextView
+        android:id="@+id/sign_up_link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Don't have an account? Sign Up"
+        android:textColor="@color/primary"
+        android:textSize="14sp"
+        android:layout_gravity="center"/>
+    </LinearLayout>
+</LinearLayout>

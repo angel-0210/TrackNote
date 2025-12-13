@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="button">#FFD700</color>         <!-- Saffron Bloom – Buttons, icons -->
+    <color name="background">#FFFBEA</color>           <!-- Honey Mist – App background -->
+    <color name="card">#FFF4CC</color>             <!-- Cream Paper – Card and input backgrounds -->
+    <color name="primary">#2A2A2A</color>       <!-- Ink Charcoal – Main text -->
+    <color name="secondary">#777777</color>     <!-- Dusk Gray – Supporting text -->
+    <color name="accent">#FFC107</color>     <!-- Golden Plum – FABs, accent tags -->
+    <color name="error">#FF4F4F</color>      <!-- Cherry Blaze – Errors and alerts -->
+
+    <color name="accent2">#8037E4</color>       <!-- Strong accent -->
+    <color name="card2">#E6DAF8</color>           <!-- Surface tint -->
+    <color name="background2">#6A1B9A</color>           <!-- Text accent -->
+
+</resources>

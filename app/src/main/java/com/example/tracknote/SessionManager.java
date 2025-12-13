@@ -1,0 +1,81 @@
+package com.example.tracknote;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import com.example.tracknote.Entity.User;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+public class SessionManager {
+
+    private static final String PREF_NAME = "note_app_session";
+    private static final String KEY_IS_LOGGED_IN = "is_logged_in";
+    private static final String KEY_USER_ID = "local_user_id";
+    private static final String KEY_USERNAME = "username";
+    private static final String KEY_EMAIL = "email";
+    private static final String KEY_JOINED_DATE = "joined_date";
+
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+
+    public SessionManager(Context context) {
+        sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+    }
+
+    // Create session at login/registration
+    public void createSession(int userId, String username, String email) {
+        editor.putBoolean(KEY_IS_LOGGED_IN, true);
+        editor.putInt(KEY_USER_ID, userId);
+        editor.putString(KEY_USERNAME, username);
+        editor.putString(KEY_EMAIL, email);
+
+        if (!sharedPreferences.contains(KEY_JOINED_DATE)) {
+            String currentDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date());
+            editor.putString(KEY_JOINED_DATE, currentDate);
+        }
+
+        editor.apply();
+    }
+
+    // Save/update local user ID separately
+    public void saveUserLocalId(User user) {
+        editor.putInt(KEY_USER_ID, user.local_User_id);
+        editor.apply();
+    }
+
+    // Save/update only username
+    public void saveUsername(String username) {
+        editor.putString(KEY_USERNAME, username);
+        editor.apply();
+    }
+
+    // Access session info
+    public boolean isLoggedIn() {
+        return sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false);
+    }
+
+    public int getUserId() {
+        return sharedPreferences.getInt(KEY_USER_ID, -1);
+    }
+
+    public String getUsername() {
+        return sharedPreferences.getString(KEY_USERNAME, null);
+    }
+
+    public String getEmail() {
+        return sharedPreferences.getString(KEY_EMAIL, null);
+    }
+
+    public String getJoinedDate() {
+        return sharedPreferences.getString(KEY_JOINED_DATE, "Unknown");
+    }
+
+    public void logout() {
+        editor.clear();
+        editor.apply();
+    }
+}

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Selected (Underline) -->
+    <item android:drawable="@drawable/italic" android:state_selected="true"/>
+
+    <!-- Default (Bold Unfilled) -->
+    <item android:drawable="@drawable/italic1"/>
+
+</selector>

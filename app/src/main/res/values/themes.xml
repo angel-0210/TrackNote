@@ -1,0 +1,31 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="Base.Theme.TrackNote" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Core Colors -->
+        <item name="colorPrimary">#FFD700</item>           <!-- button -->
+        <item name="colorOnPrimary">#2A2A2A</item>         <!-- primary text on button -->
+
+        <item name="colorSecondary">#8037E4</item>         <!-- accent2 -->
+        <item name="colorOnSecondary">#FFFFFF</item>       <!-- text on accent2 -->
+
+        <!-- Backgrounds -->
+        <item name="android:colorBackground">#FFFBEA</item> <!-- background -->
+        <item name="colorSurface">#FFF4CC</item>            <!-- card -->
+        <item name="colorOnSurface">#2A2A2A</item>          <!-- primary text on card -->
+
+        <!-- Text Colors -->
+        <item name="android:textColorPrimary">#2A2A2A</item>   <!-- primary -->
+        <item name="android:textColorSecondary">#777777</item> <!-- secondary -->
+
+        <!-- Accent & Error -->
+        <item name="colorAccent">#FFC107</item>             <!-- accent -->
+        <item name="colorError">#FF4F4F</item>              <!-- error -->
+
+        <!-- Custom Extensions -->
+        <item name="colorSurfaceVariant">#E6DAF8</item>                <!-- card2 -->
+        <item name="colorTertiary">#6A1B9A</item>              <!-- background2 -->
+    </style>
+
+
+    <style name="Theme.TrackNote" parent="Base.Theme.TrackNote" />
+</resources>

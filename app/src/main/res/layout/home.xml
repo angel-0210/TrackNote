@@ -1,0 +1,105 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+
+        android:paddingBottom="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="10dp">
+
+            <ImageButton
+                android:id="@+id/imgAcc"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/profile1"
+                android:background="@null"
+                 />
+
+        <TextView
+            android:id="@+id/greet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hello , User"
+            android:layout_marginLeft="5dp"
+            android:textSize="30sp"
+            android:textColor="@color/primary"
+            android:textStyle="bold"
+            android:layout_weight="1"
+            android:padding="8dp"
+             />
+    <Switch
+        android:id="@+id/toggleDark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="50dp"
+        android:minHeight="48dp"
+        android:thumbTint="@color/accent"
+        android:trackTint="@color/background2"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+</LinearLayout>
+    <!-- Search Bar -->
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:iconifiedByDefault="true"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:queryHint="Search notes"
+            android:background="@drawable/field_bg"
+            android:padding="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            tools:ignore="MissingClass" />
+
+
+
+        <!-- My Notes Section -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="My Notes"
+        android:textStyle="bold"
+        android:textColor="@color/primary"
+        android:textSize="22sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="15dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="end|bottom"
+            android:backgroundTint="@color/accent2"
+            android:layout_margin="4dp"
+            android:contentDescription="Add Expense"
+            android:src="@android:drawable/ic_input_add"
+            />
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 🌙 SunnyQuill Dark Theme - Yellow & Purple Accents -->
+
+    <color name="button">#FFD700</color>         <!-- Saffron Bloom – Buttons, icons -->
+    <color name="background">#121212</color>     <!-- Deep Charcoal – App background -->
+    <color name="card">#1E1E1E</color>           <!-- Graphite Paper – Card and input backgrounds -->
+    <color name="primary">#EDEDED</color>        <!-- Mist White – Main text -->
+    <color name="secondary">#BBBBBB</color>      <!-- Fog Gray – Supporting text -->
+    <color name="accent">#FFC107</color>         <!-- Golden Plum – FABs, accent tags -->
+    <color name="error">#FF4F4F</color>          <!-- Cherry Blaze – Errors and alerts -->
+
+    <color name="accent2">#B388FF</color>        <!-- Lavender Pop – Strong accent -->
+    <color name="card2">#2E1B47</color>          <!-- Deep Violet Tint – Surface tint -->
+    <color name="background2">#6A1B9A</color>    <!-- Royal Purple – Text accent -->
+</resources>
