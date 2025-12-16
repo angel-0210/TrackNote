@@ -2,123 +2,137 @@ package com.example.tracknote;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import com.example.tracknote.Dao.UserDao;
-import com.example.tracknote.Entity.User;
+import android.util.Patterns;
+import android.widget.*;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.util.Patterns;
+import com.example.tracknote.Dao.UserDao;
+import com.example.tracknote.Entity.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.mindrot.jbcrypt.BCrypt;
 
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import java.util.HashMap;
+import java.util.Map;
 
 public class Register extends AppCompatActivity {
+
     private EditText name, email, password;
     private Button sign;
     private TextView loglink;
+
+    private FirebaseAuth auth;
+    private FirebaseFirestore firestore;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
         name = findViewById(R.id.full_name);
         email = findViewById(R.id.email);
         password = findViewById(R.id.password);
-
         sign = findViewById(R.id.sign_up_button);
-
         loglink = findViewById(R.id.login_link);
+
+        auth = FirebaseAuth.getInstance();
+        firestore = FirebaseFirestore.getInstance();
+
         loglink.setOnClickListener(v -> {
-            Intent intent = new Intent(Register.this, Login.class);
-            startActivity(intent);
+            startActivity(new Intent(this, Login.class));
             finish();
         });
-        sign.setOnClickListener(v -> registerUser());
 
+        sign.setOnClickListener(v -> registerUser());
     }
 
     private void registerUser() {
         String Name = name.getText().toString().trim();
         String Mail = email.getText().toString().trim();
         String Pass = password.getText().toString().trim();
-        // Hash the password
-        String hashedPassword = BCrypt.hashpw(Pass, BCrypt.gensalt(12));
-        // Empty fields check
+
         if (Name.isEmpty() || Mail.isEmpty() || Pass.isEmpty()) {
-            Toast.makeText(this, "Please fill all required fields", Toast.LENGTH_SHORT).show();
+            toast("All fields are required");
             return;
         }
 
-        // Email validation
         if (!Patterns.EMAIL_ADDRESS.matcher(Mail).matches()) {
-            email.setError("Please enter a valid email");
+            email.setError("Invalid email");
             return;
-        } else {
-            email.setError(null); // Clear error
         }
 
-        // Password validation
         if (Pass.length() < 6) {
-            password.setError("Password must be at least 6 characters long");
+            password.setError("Minimum 6 characters");
             return;
-        } else {
-            password.setError(null); // Clear error
         }
 
-            new Thread(() -> {
-                AppDatabase db = AppDatabase.getINSTANCE(getApplicationContext());
-                UserDao userDao = db.userDao();
+        // STEP 1: Firebase Auth
+        auth.createUserWithEmailAndPassword(Mail, Pass)
+                .addOnSuccessListener(result -> {
+                    FirebaseUser firebaseUser = result.getUser();
+                    if (firebaseUser == null) {
+                        toast("Firebase error: user null");
+                        return;
+                    }
 
-                // Check if email already exists
-                User existingUser = userDao.getUserByEmail(Mail);
-                if (existingUser != null) {
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "Email already registered", Toast.LENGTH_SHORT).show()
-                    );
-                    return;
-                }
+                    String firebaseUid = firebaseUser.getUid();
+                    saveUserLocallyAndCloud(firebaseUid, Name, Mail, Pass);
 
-                // Create and insert new user
-                User newUser = new User();
-                newUser.name = Name;
-                newUser.email = Mail;
-                newUser.password = hashedPassword;
-                newUser.createdAt = String.valueOf(System.currentTimeMillis());
-
-                userDao.insertUser(newUser);
-
-                // Now retrieve the inserted user to get auto-generated ID
-                User insertedUser = userDao.getUserByEmail(Mail);
-
-                if (insertedUser == null) {
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "Registration failed", Toast.LENGTH_SHORT).show()
-                    );
-                    return;
-                }
-
-                // Create session using correct field: local_User_id
-                SessionManager session = new SessionManager(getApplicationContext());
-                session.createSession(insertedUser.local_User_id, insertedUser.name, insertedUser.email);
-                session.saveUserLocalId(insertedUser);
-
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "Registered Successfully", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(Register.this, Home.class);
-                    startActivity(intent);
-                    finish();
-                });
-            }).start();
-        }
-
-
+                })
+                .addOnFailureListener(e -> toast("Firebase failed: " + e.getMessage()));
     }
 
+    private void saveUserLocallyAndCloud(String firebaseUid, String name, String email, String plainPass) {
+        new Thread(() -> {
+            AppDatabase db = AppDatabase.getINSTANCE(getApplicationContext());
+            UserDao userDao = db.userDao();
+
+            if (userDao.getUserByEmail(email) != null) {
+                runOnUiThread(() -> toast("Email already registered"));
+                return;
+            }
+
+            String hashedPassword = BCrypt.hashpw(plainPass, BCrypt.gensalt());
+            User user = new User();
+            user.setName(name);
+            user.setEmail(email);
+            user.setPassword(hashedPassword);
+            user.setFirebaseUid(firebaseUid);
+            user.setLastModified(System.currentTimeMillis());
+
+            long localId = userDao.insert(user); //  Room insert off main thread
+
+            // Firestore save
+            Map<String, Object> data = new HashMap<>();
+            data.put("name", name);
+            data.put("email", email);
+            data.put("createdAt", System.currentTimeMillis());
+
+            firestore.collection("users")
+                    .document(firebaseUid)
+                    .set(data)
+                    .addOnSuccessListener(aVoid -> runOnUiThread(() -> {
+                        // ✅ FIX: create Session on UI thread
+                        SessionManager session = new SessionManager(this);
+                        session.createSession((int)localId, name, email);
+                        session.saveFirebaseUid(firebaseUid);
+
+                        toast("Registration successful");
+                        startActivity(new Intent(Register.this, Home.class));
+                        finish();
+                    }))
+                    .addOnFailureListener(e -> runOnUiThread(() ->
+                            toast("Firestore save failed: " + e.getMessage())
+                    ));
+        }).start();
+    }
+
+
+    private void toast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    }
+}

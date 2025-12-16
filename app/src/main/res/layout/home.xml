@@ -60,6 +60,15 @@
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
             tools:ignore="MissingClass" />
+        <AutoCompleteTextView
+            android:id="@+id/etFilterCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Filter by Category"
+            android:padding="8dp"
+            android:layout_margin="8dp"
+            android:background="@drawable/notes"
+            android:inputType="text"/>
 
 
 

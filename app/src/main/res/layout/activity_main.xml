@@ -34,7 +34,8 @@
         android:scaleType="fitXY"
         app:lottie_autoPlay="true"
         app:lottie_loop="true"
-        app:lottie_rawRes="@raw/notebook" />
+        app:lottie_rawRes="@raw/notebook"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/sign_up"

@@ -1,6 +1,7 @@
 package com.example.tracknote;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 
 import com.example.tracknote.Entity.User;
@@ -17,9 +18,10 @@ public class SessionManager {
     private static final String KEY_USERNAME = "username";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_JOINED_DATE = "joined_date";
+    private static final String KEY_FIREBASE_UID = "firebase_uid";
 
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
+    private final SharedPreferences sharedPreferences;
+    private final SharedPreferences.Editor editor;
 
     public SessionManager(Context context) {
         sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -34,26 +36,57 @@ public class SessionManager {
         editor.putString(KEY_EMAIL, email);
 
         if (!sharedPreferences.contains(KEY_JOINED_DATE)) {
-            String currentDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date());
+            String currentDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+                    .format(new Date());
             editor.putString(KEY_JOINED_DATE, currentDate);
         }
 
         editor.apply();
     }
 
-    // Save/update local user ID separately
+    // Save/update local user ID
     public void saveUserLocalId(User user) {
-        editor.putInt(KEY_USER_ID, user.local_User_id);
+        editor.putInt(KEY_USER_ID, user.getLocal_User_id());
         editor.apply();
     }
 
-    // Save/update only username
+    // Firebase UID handling
+    public void saveFirebaseUid(String firebaseUid) {
+        editor.putString(KEY_FIREBASE_UID, firebaseUid);
+        editor.apply();
+    }
+
+    public String getFirebaseUid() {
+        return sharedPreferences.getString(KEY_FIREBASE_UID, null);
+    }
+
+    public boolean hasFirebaseUid() {
+        return getFirebaseUid() != null && !getFirebaseUid().isEmpty();
+    }
+
+    public void clearFirebaseUid() {
+        editor.remove(KEY_FIREBASE_UID);
+        editor.apply();
+    }
+
+    // Username update
     public void saveUsername(String username) {
         editor.putString(KEY_USERNAME, username);
         editor.apply();
     }
 
-    // Access session info
+    // Redirect if session invalid
+    public int getUserIdOrRedirect(Context context) {
+        int id = getUserId();
+        if (id == -1) {
+            Intent intent = new Intent(context, Login.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            context.startActivity(intent);
+        }
+        return id;
+    }
+
+    // Session getters
     public boolean isLoggedIn() {
         return sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false);
     }
@@ -74,8 +107,13 @@ public class SessionManager {
         return sharedPreferences.getString(KEY_JOINED_DATE, "Unknown");
     }
 
-    public void logout() {
+    // Safe logout
+    public void logout(Context context) {
         editor.clear();
         editor.apply();
+
+        Intent intent = new Intent(context, Login.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        context.startActivity(intent);
     }
 }

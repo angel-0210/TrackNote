@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+
 
     <application
         android:allowBackup="true"
@@ -18,17 +20,18 @@
 
 
         <activity
-            android:name=".Register"
-            android:exported="false"
-            android:theme="@style/Theme.TrackNote" />
-        <activity android:name=".Login" android:exported="true">
+            android:name=".LauncherActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Home" android:exported="false"/>
+
+        <activity android:name=".Login" />
+        <activity android:name=".Register" />
+        <activity android:name=".Home" />
+
         <activity android:name=".Account" android:exported="false"/>
 
     </application>

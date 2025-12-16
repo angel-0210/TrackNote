@@ -1,196 +1,171 @@
 package com.example.tracknote;
 
-import static android.content.Intent.getIntent;
-
-import android.content.Intent;
-import android.graphics.Typeface;
+import android.app.AlertDialog;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.StyleSpan;
-import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.Toast;
+import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tracknote.Dao.NotesDao;
 import com.example.tracknote.Entity.Notes;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class AddNote extends BottomSheetDialogFragment {
-    EditText title, desc;
-    Button save;
-    ImageButton bold, italic, underline, back;
-    int noteId = -1;
+
+    private EditText title, desc;
+    private AutoCompleteTextView category;
+    private View root;
+    private  ImageButton pin;
+    private int noteId = -1;
+    private int color = Color.WHITE;
+    private int isPinned = 0;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.add_note, container, false);
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
 
-        title = view.findViewById(R.id.etTitle);
-        desc = view.findViewById(R.id.etContent);
+        root = inflater.inflate(R.layout.add_note, container, false);
 
-        back = view.findViewById(R.id.back);
-        bold = view.findViewById(R.id.btnBold);
-        italic = view.findViewById(R.id.btnItalic);
-        underline = view.findViewById(R.id.btnUnderline);
-        save = view.findViewById(R.id.btnSave);
+        title = root.findViewById(R.id.etTitle);
+        desc = root.findViewById(R.id.etContent);
+        category = root.findViewById(R.id.etCategory);
 
-        // If editing existing note
+        pin = root.findViewById(R.id.btnPin);
+        ImageButton back = root.findViewById(R.id.back);
+        ImageButton colorBtn = root.findViewById(R.id.btnColor);
+        MaterialButton save = root.findViewById(R.id.btnSave);
+
+        SessionManager session = new SessionManager(requireContext());
+        NotesDao dao = AppDatabase.getINSTANCE(requireContext()).notesDao();
+
         if (getArguments() != null) {
             noteId = getArguments().getInt("noteId", -1);
-            if (noteId != -1) {
-                loadNoteForEditing(noteId);
-            }
+            if (noteId != -1) loadNote(dao);
         }
-        back.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), Home.class);
-            startActivity(intent);
-            requireActivity().finish();
 
+        pin.setOnClickListener(v -> {
+            isPinned = isPinned == 0 ? 1 : 0;
+            pin.setAlpha(isPinned == 1 ? 1f : 0.4f);
         });
-        setupFormatting();
-        save.setOnClickListener(v -> saveNotes());
-        return view;
+
+        colorBtn.setOnClickListener(v -> showColors());
+        back.setOnClickListener(v -> dismiss());
+        save.setOnClickListener(v -> saveNote(session, dao));
+
+        return root;
     }
 
-    private void loadNoteForEditing(int id) {
+    private void saveNote(SessionManager session, NotesDao dao) {
         new Thread(() -> {
-            AppDatabase db = AppDatabase.getINSTANCE(requireContext());
-            NotesDao dao = db.notesDao();
-            Notes note = dao.getNotesById(id);
 
-            if (note != null) {
-                requireActivity().runOnUiThread(() -> {
-                    title.setText(note.title);
-                    desc.setText(Html.fromHtml(note.descNote, Html.FROM_HTML_MODE_LEGACY));
-                });
+            int userId = session.getUserId();
+            Notes note = (noteId == -1) ? new Notes() : dao.getNoteById(noteId);
+
+            note.setTitle(title.getText().toString().trim());
+            note.setDescNote(Html.toHtml(desc.getText()));
+            note.setCategory(category.getText().toString());
+            note.setColor(color);
+            note.setIsPinned(isPinned);
+            note.setUser_local_id(userId);
+            note.setLastModified(System.currentTimeMillis());
+
+            if (note.getCreatedAt() == 0) {
+                note.setCreatedAt(System.currentTimeMillis());
             }
+
+            if (noteId == -1) {
+                note.setCloudNoteId(UUID.randomUUID().toString());
+                dao.insert(note);
+            } else {
+                dao.updateNote(note);
+            }
+            /* 🔥 FIRESTORE SAVE STARTS HERE */
+            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+            if (firebaseUser != null) {
+
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                Map<String, Object> noteMap = new HashMap<>();
+                noteMap.put("title", note.getTitle());
+                noteMap.put("desc", note.getDescNote());
+                noteMap.put("category", note.getCategory());
+                noteMap.put("color", note.getColor());
+                noteMap.put("isPinned", note.getIsPinned());
+                noteMap.put("createdAt", note.getCreatedAt());
+                noteMap.put("lastModified", note.getLastModified());
+                noteMap.put("cloudNoteId", note.getCloudNoteId());
+
+                db.collection("users")
+                        .document(firebaseUser.getUid())
+                        .collection("notes")
+                        .document(note.getCloudNoteId())
+                        .set(noteMap);
+            }
+            /* 🔥 FIRESTORE SAVE ENDS HERE */
+            dismiss();
         }).start();
     }
 
-    private void saveNotes() {
-        String Title = title.getText().toString().trim();
-        String Desc = Html.toHtml(desc.getText(), Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL).trim();
-
-        if (Title.isEmpty() || Desc.isEmpty()) {
-            Toast.makeText(requireContext(), "Fill both the fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+    private void loadNote(NotesDao dao) {
         new Thread(() -> {
-            AppDatabase db = AppDatabase.getINSTANCE(requireContext());
-            NotesDao dao = db.notesDao();
-            SessionManager session = new SessionManager(requireContext());
-            long result = -1;
-
-            if (noteId != -1) {
-                // Update existing note
-                Notes existingNote = dao.getNotesById(noteId);
-                if (existingNote != null) {
-                    existingNote.title = Title;
-                    existingNote.descNote = Desc;
-                    result = dao.updateNote(existingNote);
-                }
-            } else {
-                // Insert new note
-                Notes newNote = new Notes();
-                newNote.title = Title;
-                newNote.descNote = Desc;
-                newNote.createdAt = String.valueOf(System.currentTimeMillis());
-                newNote.User_local_id = session.getUserId();
-                result = dao.insertNotes(newNote);
-            }
-
-            long finalResult = result;
+            Notes n = dao.getNoteById(noteId);
             requireActivity().runOnUiThread(() -> {
-                if (finalResult > 0) {
-                    Toast.makeText(requireContext(), noteId != -1 ? "Note updated!" : "Note saved!", Toast.LENGTH_SHORT).show();
-                    if (getActivity() instanceof Home) {
-                        ((Home) getActivity()).reloadNotes();
-                    }
-                    dismiss();
+                title.setText(n.getTitle());
+                desc.setText(Html.fromHtml(n.getDescNote()));
+                category.setText(n.getCategory());
+                color = n.getColor();
+                isPinned = n.getIsPinned();
+                root.setBackgroundColor(color);
 
-                } else {
-                    Toast.makeText(requireContext(), "Failed to save/update note.", Toast.LENGTH_SHORT).show();
-                }
+                pin.setAlpha(isPinned == 1 ? 1f : 0.4f);
             });
         }).start();
     }
 
-    private void setupFormatting() {
-        bold.setOnClickListener(v -> toggleBold(desc));
-        italic.setOnClickListener(v -> toggleItalic(desc));
-        underline.setOnClickListener(v -> toggleUnderline(desc));
+    private void showColors() {
+        int[] colors = {
+                Color.rgb(255, 255, 255),   // Pastel White
+                Color.rgb(255, 253, 208), // Pastel Yellow
+                Color.rgb(119, 221, 119),   // Pastel Green
+                Color.rgb(174, 198, 207),   // Pastel Cyan/Blue
+                Color.rgb(255, 179, 186)   // Pastel Pink/Magenta
+        };
+
+        LinearLayout layout = new LinearLayout(requireContext());
+        layout.setOrientation(LinearLayout.HORIZONTAL);
+
+        for (int c : colors) {
+            View v = new View(requireContext());
+            v.setBackgroundColor(c);
+            v.setOnClickListener(x -> {
+                color = c;
+                root.setBackgroundColor(c);
+            });
+            layout.addView(v, new LinearLayout.LayoutParams(120,120));
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Choose color")
+                .setView(layout)
+                .setPositiveButton("Done", null)
+                .show();
     }
-    private void toggleBold(EditText editText) {
-        int start = editText.getSelectionStart();
-        int end = editText.getSelectionEnd();
-        Spannable str = editText.getText();
-
-        StyleSpan[] spans = str.getSpans(start, end, StyleSpan.class);
-        boolean exists = false;
-
-        for (StyleSpan span : spans) {
-            if (span.getStyle() == Typeface.BOLD) {
-                str.removeSpan(span);
-                exists = true;
-            }
-        }
-
-        if (!exists) {
-            str.setSpan(new StyleSpan(Typeface.BOLD), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-    }
-    private void toggleItalic(EditText editText) {
-        int start = editText.getSelectionStart();
-        int end = editText.getSelectionEnd();
-        Spannable str = editText.getText();
-
-        StyleSpan[] spans = str.getSpans(start, end, StyleSpan.class);
-        boolean exists = false;
-
-        for (StyleSpan span : spans) {
-            if (span.getStyle() == Typeface.ITALIC) {
-                str.removeSpan(span);
-                exists = true;
-            }
-        }
-
-        if (!exists) {
-            str.setSpan(new StyleSpan(Typeface.ITALIC), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-    }
-    private void toggleUnderline(EditText editText) {
-        int start = editText.getSelectionStart();
-        int end = editText.getSelectionEnd();
-        Spannable str = editText.getText();
-
-        UnderlineSpan[] spans = str.getSpans(start, end, UnderlineSpan.class);
-        boolean exists = false;
-
-        for (UnderlineSpan span : spans) {
-            str.removeSpan(span);
-            exists = true;
-        }
-
-        if (!exists) {
-            str.setSpan(new UnderlineSpan(), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-    }
-
 }
-

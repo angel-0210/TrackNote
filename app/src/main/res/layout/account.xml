@@ -16,7 +16,7 @@
         android:scaleType="fitXY"
         android:src="@drawable/cross"
         android:background="@color/background"
-        android:tint="@color/accent2"
+        app:tint="@color/accent2"
         android:layout_marginTop="40dp"
         android:contentDescription="back"
         />

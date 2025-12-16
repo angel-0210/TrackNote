@@ -14,7 +14,7 @@ import com.example.tracknote.Entity.User;
 @Database(entities = {
         User.class,
         Notes.class
-}, version = 1)
+}, version = 7)
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase INSTANCE;
 
