@@ -30,8 +30,10 @@ public interface NotesDao {
     @Query("SELECT * FROM notes WHERE User_local_id = :userId AND isDeleted = 0 ORDER BY isPinned DESC, createdAt DESC")
     LiveData<List<Notes>> getNotesForUser(int userId);
 
-    @Query("SELECT * FROM notes WHERE User_local_id = :userId AND isDeleted = 0 AND category = :cat ORDER BY createdAt DESC")
-    LiveData<List<Notes>> getNotesByCategory(int userId, String cat);
+//    @Query("SELECT * FROM notes WHERE User_local_id = :userId AND isDeleted = 0 AND category = :cat ORDER BY createdAt DESC")
+//    LiveData<List<Notes>> getNotesByCategory(int userId, String cat);
+    @Query("SELECT * FROM notes WHERE User_local_id= :userId AND category LIKE '%' || :category || '%' ORDER BY createdAt DESC")
+    LiveData<List<Notes>> getNotesByCategory(int userId, String category);
 
     @Query("SELECT DISTINCT category FROM notes WHERE User_local_id = :userId AND category IS NOT NULL AND category != ''")
     LiveData<List<String>> getUserCategories(int userId);
@@ -42,4 +44,13 @@ public interface NotesDao {
 
     @Query("SELECT * FROM notes WHERE cloudNoteId = :cloudId LIMIT 1")
     Notes getByCloudId(String cloudId);
+
+    @Query("SELECT * FROM notes WHERE user_local_id = :uid AND isDeleted = 0 AND isPinned = 1 ORDER BY lastModified DESC")
+    LiveData<List<Notes>> getPinnedNotesLive(int uid);
+
+    @Query("SELECT * FROM notes WHERE user_local_id = :uid AND isDeleted = 0 ORDER BY lastModified DESC")
+    LiveData<List<Notes>> getRecentNotesLive(int uid);
+
+    @Query("SELECT * FROM notes WHERE user_local_id = :uid  AND isDeleted = 0 AND createdAt BETWEEN :start AND :end")
+    LiveData<List<Notes>> getTodayNotesLive(int uid, long start, long end);
 }

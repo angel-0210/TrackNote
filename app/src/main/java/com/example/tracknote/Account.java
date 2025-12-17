@@ -76,18 +76,19 @@ public class Account extends BaseActivity {
 
 
         backButton.setOnClickListener(v -> {
+
             startActivity(new Intent(Account.this, Home.class));
             finish();
         });
 
-        // **<<--- CRITICAL FIX 1: Add read permission flag --->>**
+        // ** Add read permission flag **
         profileImg.setOnClickListener(v->{
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             // CRITICAL LINE: Grants temporary read permission to the URI.
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             imagePickerLauncher.launch(intent);
         });
-        // **<<--- END CRITICAL FIX 1 --->>**
+
 
         logoutButton.setOnClickListener(v -> {
             sessionManager.logout(getApplicationContext());
@@ -98,7 +99,7 @@ public class Account extends BaseActivity {
         });
     }
 
-    // **<<--- CRITICAL FIX 2: Implement persistent URI access --->>**
+    // ** Implement persistent URI access **
     private void saveImageUri(Uri uri) {
         // Updated method signature from String to Uri
         int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
@@ -111,7 +112,7 @@ public class Account extends BaseActivity {
         // Save the URI as a string
         prefs.edit().putString(KEY_USER_ICON, uri.toString()).apply();
     }
-    // **<<--- END CRITICAL FIX 2 --->>**
+
 
 
     private void loadImage() {

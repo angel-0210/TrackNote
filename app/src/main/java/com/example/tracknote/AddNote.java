@@ -12,6 +12,11 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.style.StyleSpan;
+import android.text.style.UnderlineSpan;
+
 import com.example.tracknote.Dao.NotesDao;
 import com.example.tracknote.Entity.Notes;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -30,6 +35,7 @@ public class AddNote extends BottomSheetDialogFragment {
     private AutoCompleteTextView category;
     private View root;
     private  ImageButton pin;
+    private ImageButton btnBold, btnItalic, btnUnderline;
     private int noteId = -1;
     private int color = Color.WHITE;
     private int isPinned = 0;
@@ -52,6 +58,11 @@ public class AddNote extends BottomSheetDialogFragment {
         ImageButton colorBtn = root.findViewById(R.id.btnColor);
         MaterialButton save = root.findViewById(R.id.btnSave);
 
+        //  ADDED: init formatting buttons
+        btnBold = root.findViewById(R.id.btnBold);
+        btnItalic = root.findViewById(R.id.btnItalic);
+        btnUnderline = root.findViewById(R.id.btnUnderline);
+
         SessionManager session = new SessionManager(requireContext());
         NotesDao dao = AppDatabase.getINSTANCE(requireContext()).notesDao();
 
@@ -65,11 +76,51 @@ public class AddNote extends BottomSheetDialogFragment {
             pin.setAlpha(isPinned == 1 ? 1f : 0.4f);
         });
 
+        btnBold.setOnClickListener(v ->
+                applySpan(new StyleSpan(Typeface.BOLD)));
+
+        btnItalic.setOnClickListener(v ->
+                applySpan(new StyleSpan(Typeface.ITALIC)));
+
+        btnUnderline.setOnClickListener(v ->
+                applySpan(new UnderlineSpan()));
+
         colorBtn.setOnClickListener(v -> showColors());
         back.setOnClickListener(v -> dismiss());
         save.setOnClickListener(v -> saveNote(session, dao));
 
         return root;
+    }
+    private void applySpan(Object span) {
+        int start = desc.getSelectionStart();
+        int end = desc.getSelectionEnd();
+
+        if (start >= end) return;
+
+        Spannable text = desc.getText();
+
+        boolean remove = false;
+
+        if (span instanceof StyleSpan) {
+            StyleSpan styleSpan = (StyleSpan) span;
+            StyleSpan[] spans = text.getSpans(start, end, StyleSpan.class);
+            for (StyleSpan s : spans) {
+                if (s.getStyle() == styleSpan.getStyle()) {
+                    text.removeSpan(s);
+                    remove = true;
+                }
+            }
+        } else if (span instanceof UnderlineSpan) {
+            UnderlineSpan[] spans = text.getSpans(start, end, UnderlineSpan.class);
+            for (UnderlineSpan s : spans) {
+                text.removeSpan(s);
+                remove = true;
+            }
+        }
+
+        if (!remove) {
+            text.setSpan(span, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
     }
 
     private void saveNote(SessionManager session, NotesDao dao) {

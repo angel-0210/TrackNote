@@ -22,11 +22,11 @@
                 android:id="@+id/back"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@drawable/cross"
+                android:src="@drawable/back"
                 android:background="@android:color/transparent" />
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Add Note"
@@ -84,34 +84,41 @@
             android:padding="10dp"
             android:textSize="18sp"
             android:layout_marginTop="12dp"/>
-
-        <!-- Formatting -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_marginTop="12dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="12dp"
+            android:padding="8dp"
+            android:background="@drawable/field_bg">
 
             <ImageButton
                 android:id="@+id/btnBold"
-                android:src="@drawable/bold_selector"
-                android:background="@android:color/transparent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
+                android:src="@drawable/bold"
+                app:background="@color/card"
+                android:layout_gravity="center"
+                />
 
             <ImageButton
                 android:id="@+id/btnItalic"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:src="@drawable/italic_selector"
-                android:background="@android:color/transparent"/>
+                android:layout_height="wrap_content"
+                android:src="@drawable/italic"
+                app:background="@color/card"
+                android:layout_gravity="center"
+                />
 
             <ImageButton
                 android:id="@+id/btnUnderline"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:src="@drawable/underline_selector"
-                android:background="@android:color/transparent"/>
+                android:layout_height="wrap_content"
+                android:src="@drawable/underline"
+                app:background="@color/card"
+                android:layout_gravity="center"
+                />
         </LinearLayout>
 
         <!-- Save -->

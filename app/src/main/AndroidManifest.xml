@@ -31,9 +31,24 @@
         <activity android:name=".Login" />
         <activity android:name=".Register" />
         <activity android:name=".Home" />
+        <activity
+            android:name=".SharedNoteActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="tracknote"
+                    android:host="share"
+                    android:pathPrefix="/" />
+
+            </intent-filter>
+
+        </activity>
 
         <activity android:name=".Account" android:exported="false"/>
-
-    </application>
+            </application>
 
 </manifest>

@@ -22,7 +22,7 @@
             android:layout_weight="1"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="3dp"
-            android:textColor="@color/primary"
+            android:textColor="#141313"
             android:text="Title"
             android:minHeight="48dp"
             android:padding="5dp"
@@ -35,6 +35,19 @@
             android:layout_height="20dp"
             android:src="@drawable/ic_pin"
             android:visibility="gone" />
+        <ImageButton
+            android:id="@+id/btnShare"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/share"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Share"
+            app:tint="@color/secondary"
+            android:clickable="true"
+            android:focusable="true"/>
+
     </LinearLayout>
 
     <TextView
@@ -43,7 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="3dp"
-        android:textColor="@color/primary"
+        android:textColor="#141313"
         android:text="Category"
         android:minHeight="48dp"
         android:padding="5dp"
@@ -58,7 +71,7 @@
         android:padding="5dp"
         android:text="Write your note here..."
         android:gravity="top"
-        android:textColor="@color/primary"
+        android:textColor="#141313"
         android:textSize="16sp"
         android:layout_marginBottom="5dp" />
 </LinearLayout>

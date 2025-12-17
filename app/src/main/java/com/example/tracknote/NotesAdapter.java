@@ -8,6 +8,7 @@ import android.text.style.BackgroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,6 +28,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
 
     public interface OnNoteClickListener {
         void onNoteClick(Notes note);
+        void onShare(Notes note);
     }
 
     public NotesAdapter(List<Notes> notes, OnNoteClickListener listener) {
@@ -57,9 +59,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
         Notes note = notes.get(pos);
 
         // Background color
-        h.itemView.setBackgroundColor(
-                note.getColor() != 0 ? note.getColor() : Color.WHITE
-        );
+        h.itemView.setBackgroundColor(note.getColor() != 0 ? note.getColor() : Color.WHITE);
 
         // Pin
         if (note.getIsPinned() == 1) {
@@ -71,16 +71,42 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
 
         // Title + Content (highlight)
         h.title.setText(highlight(note.getTitle()));
-        String content = Html.fromHtml(
-                note.getDescNote() != null ? note.getDescNote() : ""
-        ).toString();
-        h.desc.setText(highlight(content));
+        Spannable formatted = (Spannable) Html.fromHtml(
+                note.getDescNote() != null ? note.getDescNote() : "",
+                Html.FROM_HTML_MODE_LEGACY
+        );
+
+    // apply search highlight on top of formatting
+        if (!searchText.isEmpty()) {
+            String lower = formatted.toString().toLowerCase();
+            String q = searchText.toLowerCase();
+            int index = lower.indexOf(q);
+
+            while (index >= 0) {
+                formatted.setSpan(
+                        new BackgroundColorSpan(Color.YELLOW),
+                        index,
+                        index + q.length(),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                );
+                index = lower.indexOf(q, index + q.length());
+            }
+        }
+
+        h.desc.setText(formatted);
+
 
         // Category
         h.category.setText(note.getCategory() != null ? note.getCategory() : "");
 
+        // Edit note
         h.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onNoteClick(note);
+        });
+
+        // Share note
+        h.shareBtn.setOnClickListener(v -> {
+            if (listener != null) listener.onShare(note);
         });
     }
 
@@ -95,12 +121,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
 
         int index = lowerText.indexOf(query);
         while (index >= 0) {
-            s.setSpan(
-                    new BackgroundColorSpan(Color.YELLOW),
-                    index,
-                    index + query.length(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            );
+            s.setSpan(new BackgroundColorSpan(Color.YELLOW),
+                    index, index + query.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             index = lowerText.indexOf(query, index + query.length());
         }
         return s;
@@ -110,6 +132,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
     public int getItemCount() {
         return notes.size();
     }
+
     public Notes getNoteAt(int position) {
         return notes.get(position);
     }
@@ -117,6 +140,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView title, desc, category;
         ImageView pin;
+        ImageButton shareBtn;
 
         ViewHolder(View v) {
             super(v);
@@ -124,6 +148,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
             desc = v.findViewById(R.id.tvContent);
             category = v.findViewById(R.id.tvCategory);
             pin = v.findViewById(R.id.pinIcon);
+            shareBtn = v.findViewById(R.id.btnShare);
         }
     }
 }

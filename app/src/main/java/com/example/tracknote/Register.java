@@ -87,6 +87,8 @@ public class Register extends AppCompatActivity {
     }
 
     private void saveUserLocallyAndCloud(String firebaseUid, String name, String email, String plainPass) {
+
+        // 1️⃣ Save to Room in background
         new Thread(() -> {
             AppDatabase db = AppDatabase.getINSTANCE(getApplicationContext());
             UserDao userDao = db.userDao();
@@ -97,6 +99,7 @@ public class Register extends AppCompatActivity {
             }
 
             String hashedPassword = BCrypt.hashpw(plainPass, BCrypt.gensalt());
+
             User user = new User();
             user.setName(name);
             user.setEmail(email);
@@ -104,32 +107,37 @@ public class Register extends AppCompatActivity {
             user.setFirebaseUid(firebaseUid);
             user.setLastModified(System.currentTimeMillis());
 
-            long localId = userDao.insert(user); //  Room insert off main thread
+            long localId = userDao.insert(user);
 
-            // Firestore save
-            Map<String, Object> data = new HashMap<>();
-            data.put("name", name);
-            data.put("email", email);
-            data.put("createdAt", System.currentTimeMillis());
+            // 2️⃣ NOW switch to MAIN thread for Firestore
+            runOnUiThread(() -> saveUserToFirestore(firebaseUid, name, email, localId));
 
-            firestore.collection("users")
-                    .document(firebaseUid)
-                    .set(data)
-                    .addOnSuccessListener(aVoid -> runOnUiThread(() -> {
-                        // ✅ FIX: create Session on UI thread
-                        SessionManager session = new SessionManager(this);
-                        session.createSession((int)localId, name, email);
-                        session.saveFirebaseUid(firebaseUid);
-
-                        toast("Registration successful");
-                        startActivity(new Intent(Register.this, Home.class));
-                        finish();
-                    }))
-                    .addOnFailureListener(e -> runOnUiThread(() ->
-                            toast("Firestore save failed: " + e.getMessage())
-                    ));
         }).start();
     }
+    private void saveUserToFirestore(String firebaseUid, String name, String email, long localId) {
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("name", name);
+        data.put("email", email);
+        data.put("createdAt", System.currentTimeMillis());
+
+        firestore.collection("users")
+                .document(firebaseUid)
+                .set(data)
+                .addOnSuccessListener(aVoid -> {
+                    SessionManager session = new SessionManager(this);
+                    session.createSession((int) localId, name, email);
+                    session.saveFirebaseUid(firebaseUid);
+
+                    toast("Registration successful");
+                    startActivity(new Intent(Register.this, Home.class));
+                    finish();
+                })
+                .addOnFailureListener(e ->
+                        toast("Failed to save in Firestore: " + e.getMessage())
+                );
+    }
+
 
 
     private void toast(String msg) {
