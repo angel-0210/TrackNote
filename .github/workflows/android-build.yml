@@ -21,10 +21,13 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-
+          
       - name: Restore google-services.json
         run: |
-          echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
+          mkdir -p app
+          cat << 'EOF' > app/google-services.json
+          ${{ secrets.GOOGLE_SERVICES_JSON }}
+          EOF
 
       - name: Restore keystore
         run: |
