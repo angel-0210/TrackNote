@@ -22,16 +22,6 @@ jobs:
           distribution: temurin
           java-version: 17
           
-      - name: Restore google-services.json
-        run: |
-          echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/google-services.json
-
-
-      - name: Verify google-services.json
-        run: |
-          ls -la app/src/release
-          wc -c app/src/release/google-services.json
-
 
       #  Restore keystore
       - name: Restore keystore
@@ -41,6 +31,11 @@ jobs:
 
       - name: Make Gradle executable
         run: chmod +x ./gradlew
+        
+      - name: Decode Google Services JSON
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo $GOOGLE_SERVICES_JSON | base64 --decode > app/google-services.json
 
       #  Build APK
       - name: Build release APK
