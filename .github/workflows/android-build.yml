@@ -21,20 +21,20 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-
-      #  Restore google-services.json from ENV VARIABLE
+          
       - name: Restore google-services.json
         run: |
-          mkdir -p app
-          cat << 'EOF' > app/google-services.json
-          ${{ secrets.GOOGLE_SERVICES }}
+          mkdir -p app/src/release
+      
+          cat << 'EOF' > app/src/release/google-services.json
+          ${{ secrets.GOOGLE_SERVICES_JSON }}
           EOF
 
-      #  Verify file exists and is NOT empty
       - name: Verify google-services.json
         run: |
-          ls -la app
-          wc -c app/google-services.json
+          ls -la app/src/release
+          wc -c app/src/release/google-services.json
+
 
       #  Restore keystore
       - name: Restore keystore
