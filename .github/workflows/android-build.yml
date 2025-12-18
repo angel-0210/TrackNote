@@ -28,6 +28,14 @@ jobs:
           cat << 'EOF' > app/google-services.json
           ${{ secrets.GOOGLE_SERVICES_JSON }}
           EOF
+          
+      - name: Verify google-services.json
+        run: |
+          echo "Listing app folder:"
+          ls -la app
+          echo "File size:"
+          wc -c app/google-services.json
+
 
       - name: Restore keystore
         run: |
