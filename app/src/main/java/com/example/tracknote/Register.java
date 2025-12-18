@@ -90,7 +90,7 @@ public class Register extends AppCompatActivity {
 
         // 1️⃣ Save to Room in background
         new Thread(() -> {
-            AppDatabase db = AppDatabase.getINSTANCE(getApplicationContext());
+            AppDatabase db = AppDatabase.getInstance(getApplicationContext());
             UserDao userDao = db.userDao();
 
             if (userDao.getUserByEmail(email) != null) {
@@ -130,7 +130,7 @@ public class Register extends AppCompatActivity {
                     session.saveFirebaseUid(firebaseUid);
 
                     toast("Registration successful");
-                    startActivity(new Intent(Register.this, Home.class));
+                    startActivity(new Intent(Register.this, Login.class));
                     finish();
                 })
                 .addOnFailureListener(e ->

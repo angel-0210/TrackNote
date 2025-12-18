@@ -18,8 +18,7 @@ import java.net.URL;
 public class UpdateManager {
 
     private static final String UPDATE_URL =
-            "https://raw.githubusercontent.com/YOUR_USERNAME/tracknote/main/update.json";
-
+            "https://raw.githubusercontent.com/angel-0210/TrackNote/master/update.json";
     public static void checkForUpdate(Activity activity) {
         new Thread(() -> {
             try {
@@ -51,16 +50,27 @@ public class UpdateManager {
         }).start();
     }
 
-    private static void showUpdateDialog(Activity activity, String apkUrl) {
-        new AlertDialog.Builder(activity)
-                .setTitle("Update Available")
-                .setMessage("A new version of TrackNote is available.")
-                .setCancelable(false)
-                .setPositiveButton("Update", (d, w) ->
-                        downloadAndInstall(activity, apkUrl))
-                .setNegativeButton("Later", null)
-                .show();
+    public static void showUpdateDialog(Activity activity, String apkUrl) {
+
+        if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
+            return; //  DO NOT show dialog
+        }
+
+        activity.runOnUiThread(() -> {
+            if (activity.isFinishing() || activity.isDestroyed()) return;
+
+            new AlertDialog.Builder(activity)
+                    .setTitle("Update Available")
+                    .setMessage("A new version is available. Update now?")
+                    .setCancelable(false)
+                    .setPositiveButton("Update", (d, w) -> {
+                        downloadAndInstall(activity, apkUrl);
+                    })
+                    .setNegativeButton("Later", null)
+                    .show();
+        });
     }
+
 
     private static void downloadAndInstall(Activity activity, String apkUrl) {
         new Thread(() -> {

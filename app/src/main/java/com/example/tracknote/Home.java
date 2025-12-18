@@ -46,7 +46,7 @@ public class Home extends BaseActivity implements NotesAdapter.OnNoteClickListen
 
         session = new SessionManager(this);
         userId = session.getUserIdOrRedirect(this);
-        noteDao = AppDatabase.getINSTANCE(this).notesDao();
+        noteDao = AppDatabase.getInstance(this).notesDao();
 
         TextView greet = findViewById(R.id.greet);
         greet.setText("Hello, " + session.getUsername());

@@ -66,7 +66,7 @@ public class Login extends AppCompatActivity {
         }
 
         new Thread(() -> {
-            AppDatabase db = AppDatabase.getINSTANCE(getApplicationContext());
+            AppDatabase db = AppDatabase.getInstance(getApplicationContext());
             UserDao userDao = db.userDao();
 
             // Offline login using Room

@@ -12,23 +12,24 @@ android {
         applicationId = "com.example.tracknote"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
-
+        versionCode = 2
+        versionName = "2.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += mapOf(
-                    "room.schemaLocation" to "$projectDir/schemas"
-                )
-            }
+    signingConfigs {
+        create("release") {
+            storeFile = file("keystore/my-release-key.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
         }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -45,10 +46,12 @@ android {
         viewBinding = true
         buildConfig = true
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
 }
+
 
 dependencies {
     // AndroidX & UI

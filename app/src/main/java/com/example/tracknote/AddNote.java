@@ -64,7 +64,7 @@ public class AddNote extends BottomSheetDialogFragment {
         btnUnderline = root.findViewById(R.id.btnUnderline);
 
         SessionManager session = new SessionManager(requireContext());
-        NotesDao dao = AppDatabase.getINSTANCE(requireContext()).notesDao();
+        NotesDao dao = AppDatabase.getInstance(requireContext()).notesDao();
 
         if (getArguments() != null) {
             noteId = getArguments().getInt("noteId", -1);
@@ -127,53 +127,41 @@ public class AddNote extends BottomSheetDialogFragment {
         new Thread(() -> {
 
             int userId = session.getUserId();
+            String firebaseUid = session.getFirebaseUid();
+
             Notes note = (noteId == -1) ? new Notes() : dao.getNoteById(noteId);
 
             note.setTitle(title.getText().toString().trim());
-            note.setDescNote(Html.toHtml(desc.getText()));
+            note.setDescNote(Html.toHtml(desc.getText(), Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL));
             note.setCategory(category.getText().toString());
             note.setColor(color);
             note.setIsPinned(isPinned);
             note.setUser_local_id(userId);
             note.setLastModified(System.currentTimeMillis());
 
-            if (note.getCreatedAt() == 0) {
-                note.setCreatedAt(System.currentTimeMillis());
+            if (note.getCreatedAt() == 0) note.setCreatedAt(System.currentTimeMillis());
+
+            if (note.getCloudNoteId() == null || note.getCloudNoteId().isEmpty()) {
+                note.setCloudNoteId(UUID.randomUUID().toString());
             }
 
+            // --- Save locally ---
             if (noteId == -1) {
-                note.setCloudNoteId(UUID.randomUUID().toString());
                 dao.insert(note);
             } else {
                 dao.updateNote(note);
             }
-            /* 🔥 FIRESTORE SAVE STARTS HERE */
-            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-            if (firebaseUser != null) {
+            // --- Push to Firestore via SyncManager ---
+            SyncManager syncManager = new SyncManager(requireContext(), firebaseUid);
+            syncManager.pushNoteToCloud(note);
 
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
+            requireActivity().runOnUiThread(this::dismiss);
 
-                Map<String, Object> noteMap = new HashMap<>();
-                noteMap.put("title", note.getTitle());
-                noteMap.put("desc", note.getDescNote());
-                noteMap.put("category", note.getCategory());
-                noteMap.put("color", note.getColor());
-                noteMap.put("isPinned", note.getIsPinned());
-                noteMap.put("createdAt", note.getCreatedAt());
-                noteMap.put("lastModified", note.getLastModified());
-                noteMap.put("cloudNoteId", note.getCloudNoteId());
-
-                db.collection("users")
-                        .document(firebaseUser.getUid())
-                        .collection("notes")
-                        .document(note.getCloudNoteId())
-                        .set(noteMap);
-            }
-            /* 🔥 FIRESTORE SAVE ENDS HERE */
-            dismiss();
         }).start();
     }
+
+
 
     private void loadNote(NotesDao dao) {
         new Thread(() -> {

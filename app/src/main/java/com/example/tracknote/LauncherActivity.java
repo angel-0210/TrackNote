@@ -11,6 +11,7 @@ public class LauncherActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         UpdateManager.checkForUpdate(this);
 
         SessionManager session = new SessionManager(this);
@@ -22,10 +23,4 @@ public class LauncherActivity extends AppCompatActivity {
         }
         finish();
     }
-    @Override
-    protected void onStart() {
-        super.onStart();
-        UpdateManager.checkForUpdate(this);
-    }
-
 }

@@ -22,7 +22,7 @@ public class AuthManager {
     public AuthManager(Context context) {
         this.context = context;
         this.auth = FirebaseAuth.getInstance();
-        this.userDao = AppDatabase.getINSTANCE(context).userDao();
+        this.userDao = AppDatabase.getInstance(context).userDao();
     }
 
     public void signInAnonymously(OnAuthCompleteListener listener) {

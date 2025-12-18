@@ -1,6 +1,7 @@
 package com.example.tracknote;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.example.tracknote.Dao.NotesDao;
 import com.example.tracknote.Entity.Notes;
@@ -16,7 +17,7 @@ public class SyncManager {
     private final String firebaseUid;
 
     public SyncManager(Context context, String firebaseUid) {
-        this.notesDao = AppDatabase.getINSTANCE(context).notesDao();
+        this.notesDao = AppDatabase.getInstance(context).notesDao();
         this.firestore = FirebaseFirestore.getInstance();
         this.firebaseUid = firebaseUid;
     }
@@ -44,7 +45,10 @@ public class SyncManager {
                 .document(firebaseUid)
                 .collection("notes")
                 .document(cloudId)
-                .set(note);
+                .set(note)
+                .addOnSuccessListener(aVoid -> Log.d("Firestore", "Note uploaded"))
+                .addOnFailureListener(e -> Log.e("Firestore", "Upload failed", e));
+
     }
 
     // Pull all notes from Firestore to local DB

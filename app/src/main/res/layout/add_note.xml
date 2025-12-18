@@ -88,36 +88,42 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="12dp"
-            android:padding="8dp"
-            android:background="@drawable/field_bg">
+            android:gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:padding="4dp"
+            >
 
             <ImageButton
                 android:id="@+id/btnBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/bold"
-                app:background="@color/card"
+                android:background="@null"
+                android:padding="5dp"
                 android:layout_gravity="center"
+                app:tint="@color/accent2"
                 />
 
             <ImageButton
                 android:id="@+id/btnItalic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
                 android:src="@drawable/italic"
-                app:background="@color/card"
+                android:background="@null"
                 android:layout_gravity="center"
+                app:tint="@color/accent2"
                 />
 
             <ImageButton
                 android:id="@+id/btnUnderline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
                 android:src="@drawable/underline"
-                app:background="@color/card"
+                android:background="@null"
                 android:layout_gravity="center"
+                app:tint="@color/accent2"
                 />
         </LinearLayout>
 
