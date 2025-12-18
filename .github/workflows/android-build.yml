@@ -1,52 +1,65 @@
-name: Android Build & Release
+name: TrackNote Auto Release
 
 on:
   push:
     branches:
-      - main   # trigger build on main branch
-  workflow_dispatch:  # manual trigger
+      - main
+      - master
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    name: Build APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v2
-        with:
-          api-level: 33
-          build-tools: 33.0.2
+      - name: Decode keystore
+        run: |
+          mkdir -p app/keystore
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore/my-release-key.jks
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
 
-      - name: Build Release APK
+      - name: Build signed release APK
         run: ./gradlew assembleRelease
 
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
-          body: |
-            Auto-generated release from GitHub Actions
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get version info
+        id: version
+        run: |
+          VERSION_CODE=$(grep versionCode app/build.gradle | head -1 | awk '{print $2}')
+          VERSION_NAME=$(grep versionName app/build.gradle | head -1 | awk -F\" '{print $2}')
+          echo "code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "name=$VERSION_NAME" >> $GITHUB_OUTPUT
 
-      - name: Upload APK to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: app/build/outputs/apk/release/app-release.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare release folder
+        run: |
+          mkdir -p releases
+          cp app/build/outputs/apk/release/app-release.apk releases/tracknote_v${{ steps.version.outputs.code }}.apk
+
+      - name: Generate update.json
+        run: |
+          cat > update.json <<EOF
+          {
+            "versionCode": ${{ steps.version.outputs.code }},
+            "apkUrl": "https://raw.githubusercontent.com/angel-0210/TrackNote/main/releases/tracknote_v${{ steps.version.outputs.code }}.apk"
+          }
+          EOF
+
+      - name: Commit APK and update.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add releases update.json
+          git commit -m "Auto release v${{ steps.version.outputs.code }}" || echo "No changes"
+          git push
