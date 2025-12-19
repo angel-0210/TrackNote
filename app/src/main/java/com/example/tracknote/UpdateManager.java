@@ -36,7 +36,7 @@ public class UpdateManager {
                 }
 
                 JSONObject obj = new JSONObject(json.toString());
-                int latestVersion = obj.getInt("versionCode");
+                int latestVersion = obj.getInt("latestVersionCode");
                 String apkUrl = obj.getString("apkUrl");
 
                 if (latestVersion > BuildConfig.VERSION_CODE) {
