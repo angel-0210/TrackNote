@@ -18,7 +18,7 @@ import java.net.URL;
 public class UpdateManager {
 
     private static final String UPDATE_URL =
-            "https://raw.githubusercontent.com/angel-0210/TrackNote/master/update.json";
+            "https://raw.githubusercontent.com/angel-0210/TrackNote/master/app/update.json";
     public static void checkForUpdate(Activity activity) {
         new Thread(() -> {
             try {
