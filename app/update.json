@@ -1,4 +1,6 @@
 {
-  "versionCode": 2,
-  "apkUrl": "https://github.com/angel-0210/TrackNote/releases/download/v1.0.0/tracknote.apk"
+  "latestVersionCode": 2,
+  "latestVersionName": "1.1",
+  "apkUrl": "https://github.com/angel-0210/TrackNote/releases/download/v1.1/app-release.apk",
+  "forceUpdate": false
 }
