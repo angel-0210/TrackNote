@@ -19,13 +19,19 @@ public class SessionManager {
     private static final String KEY_EMAIL = "email";
     private static final String KEY_JOINED_DATE = "joined_date";
     private static final String KEY_FIREBASE_UID = "firebase_uid";
-
+    private static final String KEY_IS_FIRST_LAUNCH = "is_first_launch";
     private final SharedPreferences sharedPreferences;
     private final SharedPreferences.Editor editor;
 
     public SessionManager(Context context) {
         sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
+        // Automatically reset old dummy user data on a new install
+        if (sharedPreferences.getBoolean(KEY_IS_FIRST_LAUNCH, true)) {
+            clearSession();
+            editor.putBoolean(KEY_IS_FIRST_LAUNCH, false);
+            editor.apply();
+        }
     }
 
     // Create session at login/registration
@@ -115,5 +121,9 @@ public class SessionManager {
         Intent intent = new Intent(context, Login.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         context.startActivity(intent);
+    }
+    public void clearSession() {
+        editor.clear();
+        editor.apply();
     }
 }
