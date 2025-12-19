@@ -1,6 +1,9 @@
 {
   "latestVersionCode": 2,
   "latestVersionName": "1.1",
-  "apkUrl": "https://github.com/angel-0210/TrackNote/releases/download/v1.1/app-release.apk",
-  "forceUpdate": false
+  "apkUrl": "https://your-domain.com/app-release.apk",
+  "forceUpdate": false,
+  "versionCode": 3,
+  "versionName": "2.1.2",
+  "changelog": "New release 2.1.2"
 }
