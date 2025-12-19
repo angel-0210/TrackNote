@@ -26,16 +26,6 @@
         android:textColor="@color/card"
         android:textStyle="bold"
        />
-    <com.airbnb.lottie.LottieAnimationView
-        android:layout_width="200dp"
-        android:layout_height="176dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="5dp"
-        android:scaleType="fitXY"
-        app:lottie_autoPlay="true"
-        app:lottie_loop="true"
-        app:lottie_rawRes="@raw/notebook"
-        android:visibility="gone"/>
 
     <Button
         android:id="@+id/sign_up"
