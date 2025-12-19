@@ -37,3 +37,50 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew assembleRelease
+ # -----------------------------
+      # Extract version info
+      # -----------------------------
+      - name: Read version info
+        id: version
+        run: |
+          VERSION_CODE=$(grep versionCode app/build.gradle.kts | head -1 | sed 's/[^0-9]*//g')
+          VERSION_NAME=$(grep versionName app/build.gradle.kts | head -1 | cut -d '"' -f2)
+
+          echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "versionName=$VERSION_NAME" >> $GITHUB_OUTPUT
+
+      # -----------------------------
+      # Update update.json
+      # -----------------------------
+      - name: Update update.json
+        run: |
+          jq \
+            --arg vc "${{ steps.version.outputs.versionCode }}" \
+            --arg vn "${{ steps.version.outputs.versionName }}" \
+            --arg url "https://your-domain.com/app-release.apk" \
+            --arg log "New release ${{ steps.version.outputs.versionName }}" \
+            '.versionCode=($vc|tonumber) |
+             .versionName=$vn |
+             .apkUrl=$url |
+             .changelog=$log' \
+            update.json > tmp.json && mv tmp.json update.json
+
+      # -----------------------------
+      # Commit update.json
+      # -----------------------------
+      - name: Commit update.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add update.json
+          git commit -m "Update update.json for release ${{ steps.version.outputs.versionName }}" || echo "No changes"
+          git push
+
+      # -----------------------------
+      # Upload APK
+      # -----------------------------
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: app/build/outputs/apk/release/app-release.apk
