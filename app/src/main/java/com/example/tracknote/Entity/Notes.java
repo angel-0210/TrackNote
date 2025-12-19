@@ -24,7 +24,7 @@ public class Notes {
         @PrimaryKey(autoGenerate = true)
         private int local_note_id;
 
-        private int User_local_id; // FK
+        private Integer User_local_id; // FK
 
         @NonNull
         @ColumnInfo(defaultValue = "")
@@ -57,8 +57,9 @@ public class Notes {
         public int getLocal_note_id() { return local_note_id; }
         public void setLocal_note_id(int local_note_id) { this.local_note_id = local_note_id; }
 
-        public int getUser_local_id() { return User_local_id; }
-        public void setUser_local_id(int user_local_id) { User_local_id = user_local_id; }
+        public Integer getUser_local_id() { return User_local_id; }
+        public void setUser_local_id(Integer user_local_id) { User_local_id = user_local_id; }
+
 
         @NonNull
         public String getCloudNoteId() { return cloudNoteId; }

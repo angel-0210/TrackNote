@@ -153,8 +153,10 @@ public class AddNote extends BottomSheetDialogFragment {
             }
 
             // --- Push to Firestore via SyncManager ---
-            SyncManager syncManager = new SyncManager(requireContext(), firebaseUid);
-            syncManager.pushNoteToCloud(note);
+            if (firebaseUid != null && !firebaseUid.isEmpty()) {
+                SyncManager syncManager = new SyncManager(requireContext(), firebaseUid);
+                syncManager.pushNoteToCloud(note);
+            }
 
             requireActivity().runOnUiThread(this::dismiss);
 

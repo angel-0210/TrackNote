@@ -14,7 +14,7 @@ import com.example.tracknote.Entity.User;
 @Database(entities = {
         User.class,
         Notes.class
-}, version = 7)
+}, version = 11)
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase INSTANCE;
 
@@ -26,10 +26,13 @@ public abstract class AppDatabase extends RoomDatabase {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(
-                            context.getApplicationContext(),
-                            AppDatabase.class,
-                            "trackNote_db"
-                    ).fallbackToDestructiveMigration().build();
+                                    context.getApplicationContext(),
+                                    AppDatabase.class,
+                                    "trackNote_db"
+                            )
+                            .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
+                            .fallbackToDestructiveMigration()
+                            .build();
                 }
             }
         }

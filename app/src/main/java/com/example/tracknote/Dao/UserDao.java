@@ -31,7 +31,7 @@ public interface UserDao {
     @Query("SELECT * FROM User WHERE email = :email LIMIT 1")
     User findByEmail(String email);
 
-    @Query("SELECT COUNT(*) FROM user WHERE local_User_id = :id")
+    @Query("SELECT COUNT(*) FROM User WHERE local_User_id = :id")
     int userExists(int id);
 
 
